@@ -8,6 +8,11 @@ for an example of formatting.
 
 ## 2026
 
+* 30 October 2026: nextclade - the BDBV workflow is now the main `nextclade/Snakefile`
+  (it was `nextclade/Snakefile_BDBV`), so the shared pathogen CI runs it. The unfinished
+  Zaire workflow moved to `nextclade/Snakefile_zaire`. The sequence and metadata inputs
+  are now set by `config.inputs` rather than hardcoded to the ingest workflow's output.
+
 * 13 October 2026: phylogenetic - support use of cached remote inputs.
   See https://github.com/nextstrain/shared/pull/87 for more details.
 

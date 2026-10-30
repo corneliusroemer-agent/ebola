@@ -1,0 +1,7 @@
+# Config for the CI build, which checks the workflow runs end to end without
+# depending on the ingest workflow having run first. The example data is a
+# 20-sequence subsample of open BDBV records, so the build stays short.
+inputs:
+  - name: example_data
+    sequences: "example_data/{species}/sequences.fasta"
+    metadata: "example_data/{species}/metadata.tsv"

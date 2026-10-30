@@ -2,6 +2,7 @@
 auspice/
 builds/
 data/
+datasets/
 results/
 logs/
 benchmarks/
