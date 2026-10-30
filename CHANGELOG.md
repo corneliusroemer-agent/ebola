@@ -11,7 +11,12 @@ for an example of formatting.
 * 30 October 2026: nextclade - the BDBV workflow is now the main `nextclade/Snakefile`
   (it was `nextclade/Snakefile_BDBV`), so the shared pathogen CI runs it. The unfinished
   Zaire workflow moved to `nextclade/Snakefile_zaire`. The sequence and metadata inputs
-  are now set by `config.inputs` rather than hardcoded to the ingest workflow's output.
+  are now set by `config.inputs` rather than hardcoded to the ingest workflow's output,
+  and are combined with `augur merge`. Metadata is now keyed on an `id` column rather
+  than `accession`; each input names its own id column via `config.inputs[].id_field`.
+  Merging with `augur merge` orders sequences differently than the previous `cat` did,
+  which perturbs the inferred tree, so this rebuild changes the BDBV reference tree
+  topology slightly even though the input sequences are unchanged.
 
 * 13 October 2026: phylogenetic - support use of cached remote inputs.
   See https://github.com/nextstrain/shared/pull/87 for more details.

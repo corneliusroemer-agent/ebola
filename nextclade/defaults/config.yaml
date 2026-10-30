@@ -10,12 +10,16 @@ changelog_url: "https://raw.githubusercontent.com/nextstrain/nextclade_data/refs
 
 # Inputs to the workflow. The sequences and metadata of every listed input are
 # concatenated before filtering, so a build can draw on several sources.
-# `{species}` is filled in per build. Override with --configfile to build from
-# something other than the ingest workflow's output, as build-configs/ci does.
+# `id_field` names the metadata column holding each input's id; the merged
+# metadata is keyed on `id` whatever the inputs called it. `{species}` is filled
+# in per build. Override with --configfile to build from something other than
+# the ingest workflow's output, as build-configs/ci does.
 inputs:
   - name: open
     sequences: "../ingest/results/{species}/sequences_open.fasta"
     metadata: "../ingest/results/{species}/metadata_open.tsv"
+    id_field: accession
   - name: restricted
     sequences: "../ingest/results/{species}/sequences_restricted.fasta"
     metadata: "../ingest/results/{species}/metadata_restricted.tsv"
+    id_field: accession

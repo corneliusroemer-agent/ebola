@@ -39,18 +39,36 @@ def _inputs(key):
     return lambda w: [i[key].format(species=w.species) for i in config["inputs"]]
 
 
+def _named_inputs(key):
+    """As _inputs, but as the NAME=PATH pairs augur merge expects."""
+    return lambda w: [
+        f"{i['name']}={i[key].format(species=w.species)}" for i in config["inputs"]
+    ]
+
+
 rule merge_data:
+    """Merge the configured inputs into one set of sequences and metadata.
+
+    Each input names the metadata column holding its id; the merged metadata is
+    keyed on `id` whatever the inputs called it.
+    """
     input:
         data=_inputs("sequences"),
         metadata=_inputs("metadata"),
+    params:
+        metadata=_named_inputs("metadata"),
+        id_fields=lambda w: [f"{i['name']}={i['id_field']}" for i in config["inputs"]],
     output:
         merged_data="results/{species}/sequences_merged.fasta",
         merged_metadata="results/{species}/metadata_merged.tsv",
     shell:
         """
-        cat {input.data} > {output.merged_data}
-        # keep only the first file's header row
-        awk 'NR == 1 || FNR > 1' {input.metadata} > {output.merged_metadata}
+        augur merge --sequences {input.data:q} \
+                    --output-sequences {output.merged_data:q}
+        augur merge --metadata {params.metadata:q} \
+                    --metadata-id-columns {params.id_fields:q} \
+                    --output-metadata {output.merged_metadata:q} \
+                    --output-metadata-id-column id
         """
 
 rule filter:
@@ -65,7 +83,7 @@ rule filter:
         min_length=18000,
     shell:
         """
-        augur filter --metadata-id-columns accession --sequences {input.data} --metadata {input.metadata} \
+        augur filter --metadata-id-columns id --sequences {input.data} --metadata {input.metadata} \
                      --min-length {params.min_length} \
                      --subsample-max-sequences 500 \
                      --subsample-seed 0 \
@@ -90,7 +108,7 @@ rule add_strain_name:
         def get_admindiv(row):
             return row["location"] if not pd.isna(row["location"]) else row["division"]
         metadata["strain"] = metadata.apply(
-            lambda row: f"{row['accession']}|{get_admindiv(row)}|{get_country_code(row['country'])}/{row['date']}",
+            lambda row: f"{row['id']}|{get_admindiv(row)}|{get_country_code(row['country'])}/{row['date']}",
             axis=1,
         )
         metadata.to_csv(output.metadata_with_strain, sep="\t", index=False)
@@ -257,7 +275,7 @@ rule export:
         """
         augur export v2 --tree {input.tree} \
                     --metadata {input.metadata} \
-                    --metadata-id-columns accession \
+                    --metadata-id-columns id \
                     --description {input.description} \
                     --auspice-config {input.auspice_config}  \
                     --node-data {input.ancestral_seqs} {input.outbreaks}\
@@ -280,11 +298,11 @@ rule replace_taxon_names:
             tree = json.load(f)
 
         metadata = pd.read_csv(input.metadata, sep="\t")
-        accession_to_strain = dict(zip(metadata["accession"], metadata["strain"]))
+        id_to_strain = dict(zip(metadata["id"], metadata["strain"]))
 
         def replace_name(node):
-            if "name" in node and node["name"] in accession_to_strain:
-                node["name"] = accession_to_strain[node["name"]]
+            if "name" in node and node["name"] in id_to_strain:
+                node["name"] = id_to_strain[node["name"]]
             if "children" in node:
                 for child in node["children"]:
                     replace_name(child)
@@ -303,7 +321,7 @@ rule example_sequences:
         example_sequences="results/{species}/example_sequences.fasta",
     shell:
         """
-        augur filter --metadata-id-columns accession strain --metadata {input.metadata} --sequences {input.sequences} \
+        augur filter --metadata-id-columns id --metadata {input.metadata} --sequences {input.sequences} \
                      --subsample-max-sequences 10 --subsample-seed 0 --min-length 500 --group-by year --exclude-where "dataUseTerms=RESTRICTED" \
                      --output-sequences {output.example_sequences}
         """

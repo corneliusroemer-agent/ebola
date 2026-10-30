@@ -56,15 +56,19 @@ inputs/outputs should be relative to the nextclade directory.
 ## Inputs
 
 `inputs` in [defaults/config.yaml](defaults/config.yaml) lists the sequence and metadata
-files to build from; they are concatenated before filtering. The default is the open and
-restricted output of the ingest workflow, so `nextstrain build ingest` has to have run
-first. Override `inputs` with `--configfile` to build from somewhere else.
+files to build from; they are merged with `augur merge` before filtering. Each input's
+`id_field` names the metadata column holding its id, and the merged metadata is keyed on
+`id` whatever the inputs called it, so inputs that disagree can still be combined.
+
+The default is the open and restricted output of the ingest workflow, so
+`nextstrain build ingest` has to have run first. Override `inputs` with `--configfile` to
+build from somewhere else.
 
 ## Build configs
 
 The build-configs directory contains custom configs and rules that override and/or
 extend the default workflow.
 
-- [ci](build-configs/ci/) - build that runs in CI, from the small open subsample in
-  [example_data](example_data/) instead of the ingest workflow's output
+- [ci](build-configs/ci/) - build that runs in CI, from the phylogenetic workflow's
+  [example data](../phylogenetic/example_data/) instead of the ingest workflow's output
 - [test-dataset](build-configs/test-dataset/) - build to test new Nextclade dataset
