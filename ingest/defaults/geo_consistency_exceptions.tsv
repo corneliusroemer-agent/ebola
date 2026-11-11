@@ -1,0 +1,7 @@
+# Homonyms that check_geo_consistency.py should not report, as
+# '<resolution><tab><value><tab><parent>', one row per legitimate combination.
+# A value stays quiet only while every parent it appears under is listed here.
+# Lines starting with '#' are ignored as comments.
+#
+# Values in different countries are never compared, so only same-country
+# homonyms need an entry. There are none yet.
