@@ -110,6 +110,8 @@ curate_geography:
   # The path to the local geolocation rules within the pathogen repo
   # The path should be relative to the ingest directory.
   local_geolocation_rules: "defaults/geolocation_rules.tsv"
+  # Homonyms that check_geo_consistency.py should not report
+  consistency_exceptions: "defaults/geo_consistency_exceptions.tsv"
   # Path to the manual annotations file
   # The path should be relative to the ingest directory
   annotations: "defaults/annotations_geo.tsv"

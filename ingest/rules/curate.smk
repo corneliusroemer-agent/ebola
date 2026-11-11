@@ -218,9 +218,11 @@ rule curate_geography:
         geolocation_rules=config["curate_geography"]["local_geolocation_rules"],
         annotations=config["curate_geography"]["annotations"],
         lat_longs="../phylogenetic/defaults/lat_longs.tsv",
+        consistency_exceptions=config["curate_geography"]["consistency_exceptions"],
     output:
         metadata="data/{species}/metadata_geo-improvements.tsv",
         lat_longs_report="data/{species}/lat-longs-coverage.txt",
+        consistency_report="data/{species}/geo-consistency.txt",
     params:
         id_column=config["curate_geography"]["id_column"],
         annotations_id=config["curate_geography"]["annotations_id"],
@@ -247,6 +249,13 @@ rule curate_geography:
             --lat-longs {input.lat_longs:q} \
             --id-column {params.id_column:q} \
             --output {output.lat_longs_report:q}
+
+        # Report any geographic value filed under more than one parent.
+        scripts/check_geo_consistency.py \
+            --metadata {output.metadata:q} \
+            --id-column {params.id_column:q} \
+            --exceptions {input.consistency_exceptions:q} \
+            --output {output.consistency_report:q}
         """
 
 
