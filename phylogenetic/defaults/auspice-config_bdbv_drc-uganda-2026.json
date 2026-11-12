@@ -27,6 +27,11 @@
       "type": "temporal"
     },
     {
+      "key": "lineage",
+      "title": "Lineage",
+      "type": "categorical"
+    },
+    {
       "key": "adar_clusters",
       "title": "ADAR clusters identified",
       "type": "categorical"
@@ -178,10 +183,12 @@
   ],
   "display_defaults": {
     "tip_label": "strain",
+    "branch_label": "lineage",
     "color_by": "location",
     "geo_resolution": "location"
   },
   "filters": [
+    "lineage",
     "country",
     "division",
     "author"
