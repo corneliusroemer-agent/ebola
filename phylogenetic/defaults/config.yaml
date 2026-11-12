@@ -225,6 +225,10 @@ count_mutations:
     cds: [GP]
 
 
+lineages:
+  bdbv/drc-uganda-2026:
+    definitions: ../shared/bdbv/lineages/lineage-definitions_bdbv_drc-uganda-2026.tsv
+
 label_outbreaks:
   ebov/all-outbreaks: true
   bdbv/all-outbreaks: true

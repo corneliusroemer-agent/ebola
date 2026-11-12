@@ -23,6 +23,8 @@ def node_data_files(wildcards):
         files.append(f"results/{wildcards.species}/{wildcards.build}/muts-counts.json")
     if config['label_outbreaks'].get(build_pair, False):
         files.append(f"results/{wildcards.species}/{wildcards.build}/outbreaks.json")
+    if config.get('lineages', {}).get(build_pair, False):
+        files.append(f"results/{wildcards.species}/{wildcards.build}/lineages.json")
     if config.get('translate', {}).get(build_pair, False):
         files.append(f"results/{wildcards.species}/{wildcards.build}/aa_muts.json")
 
@@ -64,14 +66,28 @@ def _description(wildcards):
         return ['--description', resolve_config_path(fname)({})]
     return []
 
-def _colors(wildcards):
-    """
-    Returns a list of arguments to be supplied to `augur export v2` for custom, per-dataset
-    colors (if defined in config).
-    """
-    if fname:=config['export'][f"{wildcards.species}/{wildcards.build}"].get('colors'):
-        return ['--colors', resolve_config_path(fname)({})]
+def _colors_file(wildcards):
+    build_pair = f"{wildcards.species}/{wildcards.build}"
+    lineages = config.get('lineages', {}).get(build_pair, False)
+    fname = config['export'][build_pair].get('colors')
+    if lineages and fname:
+        return f"results/{wildcards.species}/{wildcards.build}/colors.tsv"
+    if lineages:
+        return f"results/{wildcards.species}/{wildcards.build}/lineage_colors.tsv"
+    if fname:
+        return resolve_config_path(fname)({})
     return []
+
+
+rule concatenate_colors:
+    """Config defined colors TSV will be joined with the generated lineage colors"""
+    input:
+        lineage = "results/{species}/{build}/lineage_colors.tsv",
+        user = lambda w: resolve_config_path(config['export'][f"{w.species}/{w.build}"]['colors'])({}),
+    output:
+        colors = "results/{species}/{build}/colors.tsv",
+    shell:
+        """cat {input.lineage} {input.user} > {output.colors}"""
 
 
 BASE_LAT_LONGS = os.path.join(workflow.basedir, 'defaults', 'lat_longs.tsv')
@@ -119,12 +135,13 @@ rule export:
         node_data_jsons = node_data_files,
         lat_longs = lambda w: "results/{species}/{build}/lat_longs.tsv" if config['export'][f"{w.species}/{w.build}"].get('lat_longs') else BASE_LAT_LONGS,
         auspice_config = _auspice_configs,
+        colors = _colors_file,
     output:
         auspice_json = "auspice/ebola_{species}_{build}.json" # TODO XXX remap name to match URLs?
     params:
         warning = _warning,
         description = _description,
-        colors = _colors,
+        colors = lambda w, input: ['--colors', input.colors] if input.colors else [],
     benchmark:
         "benchmarks/{species}/{build}/export.txt"
     log:

@@ -172,3 +172,64 @@ rule label_outbreaks:
             --tree {input.tree:q} \
             --output {output.node_data:q} {params.geographic_names}
         """
+
+
+rule lineages:
+    """Assign lineages from the config-defined definitions"""
+    input:
+        tree = "results/{species}/{build}/tree.nwk",
+        muts = "results/{species}/{build}/muts.json",
+        definitions = lambda w: resolve_config_path(config['lineages'][f"{w.species}/{w.build}"]['definitions'])({}),
+    output:
+        node_data = "results/{species}/{build}/lineages.json",
+    benchmark:
+        "benchmarks/{species}/{build}/lineages.txt"
+    log:
+        "logs/{species}/{build}/lineages.txt"
+    shell:
+        r"""
+        exec &> >(tee {log:q})
+
+        augur clades \
+            --tree {input.tree:q} \
+            --mutations {input.muts:q} \
+            --clades {input.definitions:q} \
+            --membership-name lineage \
+            --label-name lineage \
+            --output-node-data {output.node_data:q}
+        """
+
+
+rule lineage_colors:
+    """Color the lineage legend, in the order the definitions file lists them"""
+    input:
+        definitions = lambda w: resolve_config_path(config['lineages'][f"{w.species}/{w.build}"]['definitions'])({}),
+        schemes = lambda w: resolve_config_path(config['lineages'][f"{w.species}/{w.build}"].get('color_schemes', '../shared/color_schemes.tsv'))({}),
+    output:
+        ordering = "results/{species}/{build}/lineage_ordering.tsv",
+        colors = "results/{species}/{build}/lineage_colors.tsv",
+    params:
+        assign_colors = os.path.join(workflow.basedir, "..", "shared", "vendored", "scripts", "assign-colors"),
+    benchmark:
+        "benchmarks/{species}/{build}/lineage_colors.txt"
+    log:
+        "logs/{species}/{build}/lineage_colors.txt"
+    shell:
+        r"""
+        exec &> >(tee {log:q})
+
+        # The ordering is the lineages in the order the definitions introduce them.
+        awk -F '\t' '
+          /\r$/         {{ print "error: line " NR ": Windows line endings (CRLF)" > "/dev/stderr"; exit 1 }}
+          /^#/          {{ next }}                  # skip comments
+          /^$/          {{ next }}                  # skip empty lines
+          $1 == "clade" {{ next }}                  # skip the header
+          $1 in seen    {{ next }}                  # skip lineages already seen
+          {{ seen[$1] = 1; print "lineage\t" $1 }}  # print each new lineage
+        ' {input.definitions:q} > {output.ordering:q}
+
+        {params.assign_colors:q} \
+            --ordering {output.ordering:q} \
+            --color-schemes {input.schemes:q} \
+            --output {output.colors:q}
+        """
