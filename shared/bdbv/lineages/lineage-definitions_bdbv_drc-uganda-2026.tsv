@@ -1,0 +1,75 @@
+# `augur clades` definitions for bdbv/drc-uganda-2026. Sites are 1-based on NC_014373.1.
+# Color ordering is derived from the lineage order here. Add a child lineage
+# directly under its parent, not at the bottom.
+# For lineage descriptions see lineage-descriptions_bdbv_drc-uganda-2026.tsv
+clade	gene	site	alt
+
+A	nuc	3554	A
+A	nuc	4004	T
+A	nuc	15721	A
+
+A.1	clade	A	
+A.1	nuc	9068	A
+A.1	nuc	9525	A
+A.1	nuc	14629	A
+
+A.1.1	clade	A.1	
+A.1.1	nuc	2039	A
+A.1.1	nuc	8345	G
+
+A.2	clade	A	
+A.2	nuc	1871	G
+A.2	nuc	18918	G
+
+A.3	clade	A	
+A.3	nuc	268	T
+A.3	nuc	18918	G
+
+A.4	clade	A	
+A.4	nuc	4351	C
+A.4	nuc	7507	G
+
+A.5	clade	A	
+A.5	nuc	11813	G
+A.5	nuc	12628	T
+
+A.6	clade	A	
+A.6	nuc	17509	G
+A.6	nuc	18918	G
+
+A.7	clade	A	
+A.7	nuc	3092	G
+A.7	nuc	8915	C
+
+A.8	clade	A	
+A.8	nuc	6915	G
+A.8	nuc	18918	G
+
+A.9	clade	A	
+A.9	nuc	9552	C
+A.9	nuc	13024	C
+A.9	nuc	18648	T
+
+A.10	clade	A	
+A.10	nuc	9399	C
+A.10	nuc	9650	C
+
+A.11	clade	A	
+A.11	nuc	1830	C
+A.11	nuc	7975	C
+
+A.12	clade	A	
+A.12	nuc	2305	T
+A.12	nuc	6560	C
+A.12	nuc	8974	G
+A.12	nuc	9209	C
+A.12	nuc	12046	C
+
+A.13	clade	A	
+A.13	nuc	11288	A
+A.13	nuc	11335	C
+
+A.14	clade	A	
+A.14	nuc	3677	A
+A.14	nuc	6068	G
+A.14	nuc	10075	G
